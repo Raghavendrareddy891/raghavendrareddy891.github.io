@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <style>
+        
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ece5dd; /* Set background color for the entire page */
+}
+
+.container {
+    max-width: 100%;
+    margin: 100px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f6eaea; /* Set background color for the chat container */
+}
+
+#chatContainer {
+    border-radius: 8px;
+    overflow-y: auto; /* Make the chat container scrollable */
+    max-height: 400px; /* Set the maximum height for scrolling */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-image: url("C:\Users\NLG2KOR\Desktop\kalyanReddy.jpeg"); /* Set background color for the chat container */
+    margin: 20px 0; /* Add some margin for spacing */
+}
+
+.message {
+    padding: 10px;
+    margin: 5px 0;
+}
+
+
+
+.message.ai-message {
+    background-color: #ddddf1;
+    border-radius: 15px 15px 0 15px;
+    text-align: left;
+    float: right;
+    clear: both;
+    font-weight: bold; /* Clear the float to ensure proper layout */
+}
+
+#inputText {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    bottom: 0;
+    background-color: #ffffff; /* Set background color for the input box */
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 10px;
+    background-color: #128C7E;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+.message:last-child {
+    margin-bottom: 20px;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <form id="questionForm">
+                    <div class="form-group">
+                        <label for="inputText">Ask a Question:</label>
+                        <input type="text" class="form-control" id="inputText" placeholder="Type your question here...">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ask</button>
+                </form>
+                <div id="chatContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var form = document.getElementById('questionForm');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                var inputText = document.getElementById('inputText').value;
+                var chatContainer = document.getElementById('chatContainer');
+
+                // Append the user's question to the chat container
+                appendMessage(inputText, chatContainer, true);
+
+                fetch('/process_text', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'inputText=' + encodeURIComponent(inputText),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Append the AI's answer to the chat container
+                        appendMessage(data.answer, chatContainer, false);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Append an error message to the chat container
+                        appendMessage("AI Error - Unable to fetch answer.", chatContainer, false);
+                    });
+
+                // Clear the input text box
+                document.getElementById('inputText').value = '';
+            });
+
+            // function appendMessage(message, container) {
+            //     var messageElement = document.createElement('div');
+            //     messageElement.textContent = message;
+            //     container.appendChild(messageElement);
+            // }
+            function appendMessage(message, container, isUser=true) {
+    var messageElement = document.createElement('div');
+    if (isUser) {
+        // messageElement.innerHTML = '<div class="message user-message">'+ message + '</div>';
+        messageElement.textContent = message;
+        messageElement.style.backgroundColor = '#f8c6cc';
+        messageElement.style.borderRadius = '0 10px 10px 10px';
+        messageElement.style.padding='10px'
+        messageElement.style.margin='10px'
+        messageElement.style.textAlign = 'right';
+        messageElement.style.float = 'left';
+        messageElement.style.clear = 'both';
+        messageElement.style.fontWeight = 'italic';
+        
+    } else {
+        messageElement.className = 'message ai-message';
+        messageElement.textContent = message;
+        messageElement.style.textAlign = 'left'; // Align "You" messages to the right
+        messageElement.style.float = 'right';
+        messageElement.style.fontWeight = 'italic'; // Make "You" messages bold
+        messageElement.style.color = 'green';
+    }
+    container.appendChild(messageElement);
+}
+        });
+    </script>
+</body>
+</html>
+
+
